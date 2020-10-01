@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Jquery -->
+        <script src="js/jquery.js"></script>
+        <script src="js/jquery-ui.js"></script>
+
+        <!-- Bootstrap JS -->
+        <script src="js/bootstrap.bundle.js" type="text/javascript"></script>
+        <script src="js/bootstrap.js" type="text/javascript"></script>
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="css/bootstrap.css">
+        <link rel="stylesheet" href="css/bootstrap-grid.css">
+        <link href="css/bootstrap-reboot.css" rel="stylesheet">
+        <link href="css/bootwatch.css" rel="stylesheet">
+        <link rel="icon" type="image/png" sizes="16x16" href="faviconBarb.png">
+        <script>
+        var barbArray = [];
+        var WorldData;
+        var MinPoints;
+        function findBarb(){
+            if($(".world").val() == '' || $(".MinPoints").val() == ''){
+                alert("invalid input")
+            }else{
+                $(".rows").html('<div class="spinner-grow text-primary" role="status" style="margin-left: 50%;"><span class="sr-only">Loading...</span></div>');
+                barbArray = [];
+                WorldData = $(".world").val();
+                MinPoints = $(".MinPoints").val();
+                $.get("Json.php?world=" + WorldData, function(data){
+    var data2 = data.split("<br>");
+    data2.forEach(function(x){
+        if(x.split(",")[1] == "Barbarian village" && x.split(",")[5] >= parseInt(MinPoints) && x.split(",")[4] == 0){
+            BarbObject(x.split(",")[0], x.split(",")[1], x.split(",")[5], x.split(",")[2], x.split(",")[3])
+        }
+    })
+}).done(function(){
+    $(".rows").html("");
+    barbArray.sort((a,b) => (a.Points > b.Points) ? 1 : ((b.Points > a.Points) ? -1 : 0))
+    loadData()
+});
+            }
+        }
+
+
+function BarbObject(_Villid, _Name, _Points, _CordsX, _CordsY){
+    var barb = new Object();
+    barb.Villid = _Villid;
+    barb.Name = _Name;
+    barb.Points = _Points;
+    barb.CordsX = _CordsX;
+    barb.CordsY = _CordsY;
+    barbArray.push(barb);
+}
+        </script>
+        <title>Barb Spotter</title>
+    </head>
+    <body class="bg-dark">
+        
+        <div class="container">
+        <div class="alert alert-warning mb-4 mt-2">
+                <button type="button" class="close" data-dismiss="alert">×</button>
+                <h4 class="alert-heading">Barbarian Spotter</h4>
+                <p class="mb-0"><div class="container"><div class="row"><div class="col-lg-4"><input type="number" value="" placeholder="World" class="world form-control"></div><div class="col-lg-4"><input type="number" value="" placeholder="Minimum Points" class="MinPoints form-control"></div><div class="col-lg-4"><button class="btn btn-success" onclick="findBarb()">Find Barbs</button></div></div></div></p>
+              </div>
+              
+            <div class="row rows">
+            <div>
+        <script>
+        var claimedList = ['600|541']
+        function loadData(){
+            $(".rows").html("");
+            barbArray.forEach(function(x){
+                        var imageType;
+                        var claimed = false;
+                        var cords = x.CordsX + "|" + x.CordsY
+                        claimedList.forEach(function(element){
+                            if(element == cords){
+                                claimed = true;
+                            }
+                            console.log(element + " | " + cords)
+                        });
+                        if(x.Points < 300){
+                            imageType = "https://dsen.innogamescdn.com/asset/c092731a/graphic///map_new/v1_left.png"
+                        }else if(x.Points < 1000){
+                            imageType = "https://dsen.innogamescdn.com/asset/c092731a/graphic///map_new/v2_left.png"
+                        }else if(x.Points < 3000){
+                            imageType = "https://dsen.innogamescdn.com/asset/c092731a/graphic///map_new/v3_left.png"
+                        }else if(x.Points < 9000){
+                            imageType = "https://dsen.innogamescdn.com/asset/c092731a/graphic///map_new/v4_left.png"
+                        }else if(x.Points > 8999){
+                            imageType = "https://dsen.innogamescdn.com/asset/c092731a/graphic///map_new/v5_left.png"
+                        }
+                        $(".rows").prepend("<div class='col-lg-4'><div class='card mt-5' style='overflow: hidden;'><img class='card-img-top bg-primary' src='" + imageType + "' />" + (claimed ? "<div style='position: absolute;width: 55%;margin-left: -11%;margin-top: 40px;transform: rotate(-45deg);text-align: center;font-size: larger;color: antiquewhite;border: 1px solid rgba(255,255,255, 0.3);' class='bg-warning'>Sold</div>":"") + "<div class='card-body'<h4 class='card-title'>" + x.Name + "</h4><p class='card-text'><br>Points: " + x.Points + "<br>Cords: " + x.CordsX + "|" + x.CordsY + "<br></p><button onclick='Wopen(WorldData, \"" + x.CordsX + "\", \"" + x.CordsY + "\")' class='btn btn-primary'>Find on map</button> </div></div>")
+                     })
+        }
+        function Wopen(_world, _cordsx, _cordsy){
+                window.open("https://en" + _world + ".tribalwars.net/game.php?screen=map#" + _cordsx + ";" + _cordsy, "_blank")
+        }
+            
+        
+        </script>
+    </body>
+</html>
